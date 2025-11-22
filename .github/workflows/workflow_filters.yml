@@ -1,0 +1,14 @@
+name: Event Fil
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    branches:
+      - main
+jobs:
+  echo:
+    runs-on: ubuntu-latest
+    steps:
+      - run : echo "ruuning whenever PR is open or sync and branch is main "
+
