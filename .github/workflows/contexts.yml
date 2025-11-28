@@ -3,9 +3,16 @@ on:
   push:
   workflow_dispatch:
 
+env:
+  MY_WORKFLOW_VAR: "workflow"
+  MY_OVERWRITTEN_VAR: "workflow"
+
 jobs:
   echo-data:
     runs-on: ubuntu-latest
+    env:
+      MY_JOB_VAR: "job"
+      MY_OVERWRITTEN_VAR: "job"
     steps:
       - name: Display information
         run: |
@@ -18,5 +25,15 @@ jobs:
           echo "Run Number ${{github.run_number}}"
 
       - name: Retrive Varibale
-        run : |
+        run: |
           echo "Varibale value ${{vars.MY_VAR}}"
+      - name: print variables
+        env:
+          MY_OVERWRITTEN_VAR: "step"
+        run: |
+          echo "workflow run ${{env.MY_OVERWRITTEN_VAR}}"
+          echo "workflow run ${{env.MY_WORKFLOW_VAR}}"
+      - name: print variables_2
+        run: |
+          echo "workflow run ${{env.MY_OVERWRITTEN_VAR}}"
+          echo "workflow run ${{env.MY_WORKFLOW_VAR}}"
