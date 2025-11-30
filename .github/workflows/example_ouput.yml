@@ -1,0 +1,110 @@
+name: Build and Deploy (Echo Demo with Prints)
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_outcome:
+        description: "Simulate build outcome"
+        required: true
+        default: "success"
+        type: choice
+        options:
+          - success
+          - failure
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      build_outcome: ${{ steps.set-result.outputs.build_outcome }}
+
+    steps:
+      - name: Print basic context
+        run: |
+          echo "=== BUILD JOB START ==="
+          echo "Repository : $GITHUB_REPOSITORY"
+          echo "Workflow   : $GITHUB_WORKFLOW"
+          echo "Run ID     : $GITHUB_RUN_ID"
+          echo "Actor      : $GITHUB_ACTOR"
+          echo "Ref        : $GITHUB_REF"
+          echo "Event name : $GITHUB_EVENT_NAME"
+          echo "========================"
+
+      - name: Show raw dispatch input
+        run: |
+          echo "Raw workflow_dispatch inputs JSON:"
+          echo '${{ toJson(github.event.inputs) }}'
+
+      - name: Decide build result from input
+        id: set-result
+        run: |
+          echo "--- Deciding build result ---"
+          echo "User requested build outcome: '${{ github.event.inputs.build_outcome }}'"
+
+          # Set job output
+          echo "build_outcome=${{ github.event.inputs.build_outcome }}" >> "$GITHUB_OUTPUT"
+          echo "Set job output 'build_outcome' to: '${{ github.event.inputs.build_outcome }}'"
+
+          echo "Simulating build steps..."
+          echo "Step 1: Fetch dependencies (pretend)"
+          echo "Step 2: Run unit tests (pretend)"
+          echo "Step 3: Build artifact (pretend)"
+
+          echo "--- Build simulation complete ---"
+          echo "Final simulated result: '${{ github.event.inputs.build_outcome }}'"
+
+          # OPTIONAL: uncomment if you want this job to actually fail in the UI
+          if [ "${{ github.event.inputs.build_outcome }}" = "failure" ]; then
+            echo "Exiting with code 1 to simulate real build failure."
+            exit 1
+          fi
+
+      - name: Build job end marker
+        run: |
+          echo "=== BUILD JOB END ==="
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: needs.build.outputs.build_outcome == 'success'
+
+    steps:
+      - name: Print deploy pre-check
+        run: |
+          echo "=== DEPLOY JOB START ==="
+          echo "Received build outcome from previous job:"
+          echo "needs.build.outputs.build_outcome='${{ needs.build.outputs.build_outcome }}'"
+          echo "Condition to run deploy is TRUE (build_outcome == 'success')."
+
+      - name: Deploy (simulated)
+        run: |
+          echo "--- Starting simulated deployment ---"
+          echo "Using artifact from successful build (pretend)."
+          echo "Deploy Step 1: Upload files to server (pretend)."
+          echo "Deploy Step 2: Run database migrations (pretend)."
+          echo "Deploy Step 3: Restart services (pretend)."
+          echo "--- Deployment simulation finished successfully ✅ ---"
+
+      - name: Deploy job end marker
+        run: |
+          echo "=== DEPLOY JOB END ==="
+
+  explain-skip:
+    runs-on: ubuntu-latest
+    needs: build
+    if: needs.build.outputs.build_outcome != 'success'
+
+    steps:
+      - name: Explain why deploy is skipped
+        run: |
+          echo "=== EXPLAIN-SKIP JOB START ==="
+          echo "Build job output:"
+          echo "needs.build.outputs.build_outcome='${{ needs.build.outputs.build_outcome }}'"
+
+          echo "Since build_outcome != 'success', the deploy job will NOT run."
+          echo "This is expected behavior to prevent deployment on failed/unstable builds."
+          echo "You can check the 'build' job logs for more details."
+
+          echo "Tip: Re-run the workflow with input 'success' to see the deploy job execute."
+          echo "=== EXPLAIN-SKIP JOB END ==="
